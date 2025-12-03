@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hardware Engineer | Aerospace Power Systems</title>
+    <style>
+        :root {
+            --color-bg-primary: #0f1419;
+            --color-bg-secondary: #1a202c;
+            --color-text-primary: #e8eaed;
+            --color-text-secondary: #b0b4ba;
+            --color-accent-teal: #00d9ff;
+            --color-accent-orange: #ff6b35;
+            --color-accent-purple: #9d4edd;
+            --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background-color: var(--color-bg-primary);
+            color: var(--color-text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(15, 20, 25, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            padding: 1rem 2rem;
+            border-bottom: 1px solid rgba(0, 217, 255, 0.1);
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            justify-content: center;
+            gap: 2.5rem;
+            flex-wrap: wrap;
+        }
+
+        nav a {
+            color: var(--color-text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+            cursor: pointer;
+        }
+
+        nav a:hover {
+            color: var(--color-accent-teal);
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #0f1419 0%, #1a2438 100%);
+            position: relative;
+            overflow: hidden;
+            margin-top: 60px;
+        }
+
+        .stars {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+        }
+
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 3s infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+
+        .hero-content {
+            text-align: center;
+            z-index: 10;
+            position: relative;
+            max-width: 800px;
+            padding: 2rem;
+        }
+
+        .hero-title {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #00d9ff, #9d4edd);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: fadeInDown 1s ease;
+        }
+
+        .hero-subtitle {
+            font-size: 1.5rem;
+            color: var(--color-text-secondary);
+            margin-bottom: 2rem;
+            animation: fadeInUp 1s ease 0.2s both;
+        }
+
+        .hero-cta {
+            display: inline-flex;
+            gap: 1rem;
+            animation: fadeInUp 1s ease 0.4s both;
+        }
+
+        .btn {
+            padding: 0.75rem 2rem;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--color-accent-teal), var(--color-accent-purple));
+            color: white;
+            box-shadow: 0 0 20px rgba(0, 217, 255, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 0 30px rgba(0, 217, 255, 0.5);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            border: 2px solid var(--color-accent-teal);
+            color: var(--color-accent-teal);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(0, 217, 255, 0.1);
+            transform: translateY(-3px);
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* About Section */
+        .about {
+            padding: 6rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: var(--color-bg-primary);
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            margin-bottom: 3rem;
+            text-align: center;
+            color: var(--color-accent-teal);
+            position: relative;
+        }
+
+        .section-title::after {
+            content: '';
+            display: block;
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(90deg, var(--color-accent-teal), var(--color-accent-purple));
+            margin: 1rem auto 0;
+        }
+
+        .about-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            align-items: center;
+        }
+
+        .about-text h3 {
+            font-size: 1.5rem;
+            color: var(--color-accent-teal);
+            margin-bottom: 1rem;
+        }
+
+        .about-text p {
+            color: var(--color-text-secondary);
+            margin-bottom: 1.5rem;
+            line-height: 1.8;
+        }
+
+        .skills {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        .skill-item {
+            background: rgba(0, 217, 255, 0.05);
+            padding: 1rem;
+            border-radius: 5px;
+            border-left: 3px solid var(--color-accent-teal);
+            transition: all 0.3s ease;
+        }
+
+        .skill-item:hover {
+            background: rgba(0, 217, 255, 0.1);
+            transform: translateX(5px);
+        }
+
+        .skill-item strong {
+            color: var(--color-accent-teal);
+        }
+
+        @media (max-width: 768px) {
+            .about-content {
+                grid-template-columns: 1fr;
+            }
+
+            .hero-title {
+                font-size: 2rem;
+            }
+
+            nav ul {
+                gap: 1rem;
+            }
+        }
+
+        /* Projects Section */
+        .projects {
+            padding: 6rem 2rem;
+            background-color: var(--color-bg-secondary);
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .project-card {
+            background: linear-gradient(135deg, rgba(0, 217, 255, 0.05), rgba(157, 78, 221, 0.05));
+            border: 1px solid rgba(0, 217, 255, 0.1);
+            border-radius: 10px;
+            padding: 2rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .project-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 217, 255, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .project-card:hover::before {
+            left: 100%;
+        }
+
+        .project-card:hover {
+            border-color: var(--color-accent-teal);
+            transform: translateY(-10px);
+            box-shadow: 0 10px 30px rgba(0, 217, 255, 0.1);
+        }
+
+        .project-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .project-title {
+            font-size: 1.3rem;
+            color: var(--color-accent-teal);
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .project-desc {
+            color: var(--color-text-secondary);
+            margin-bottom: 1.5rem;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        .project-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .tag {
+            background: rgba(0, 217, 255, 0.1);
+            color: var(--color-accent-teal);
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            border: 1px solid rgba(0, 217, 255, 0.2);
+        }
+
+        /* Expertise Section */
+        .expertise {
+            padding: 6rem 2rem;
+            background-color: var(--color-bg-primary);
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .expertise-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+
+        .expertise-box {
+            background: linear-gradient(135deg, rgba(157, 78, 221, 0.05), rgba(255, 107, 53, 0.05));
+            border: 1px solid rgba(157, 78, 221, 0.1);
+            padding: 2rem;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .expertise-box:hover {
+            border-color: var(--color-accent-purple);
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(157, 78, 221, 0.1);
+        }
+
+        .expertise-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: var(--color-accent-orange);
+        }
+
+        .expertise-title {
+            font-size: 1.2rem;
+            color: var(--color-accent-purple);
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .expertise-desc {
+            color: var(--color-text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        /* Contact Section */
+        .contact {
+            padding: 6rem 2rem;
+            background: linear-gradient(135deg, #0f1419 0%, #1a2438 100%);
+            text-align: center;
+            border-top: 1px solid rgba(0, 217, 255, 0.1);
+        }
+
+        .contact-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .contact-text {
+            font-size: 1.1rem;
+            color: var(--color-text-secondary);
+            margin-bottom: 2rem;
+        }
+
+        .contact-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+        }
+
+        .contact-link {
+            color: var(--color-accent-teal);
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            padding: 0.5rem 1rem;
+            border: 1px solid rgba(0, 217, 255, 0.3);
+            border-radius: 5px;
+        }
+
+        .contact-link:hover {
+            background: rgba(0, 217, 255, 0.1);
+            transform: translateY(-3px);
+        }
+
+        /* Footer */
+        footer {
+            background: #0a0e12;
+            padding: 2rem;
+            text-align: center;
+            color: var(--color-text-secondary);
+            border-top: 1px solid rgba(0, 217, 255, 0.1);
+        }
+
+        /* Scroll to top button */
+        .scroll-top {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--color-accent-teal), var(--color-accent-purple));
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            transition: all 0.3s ease;
+            z-index: 999;
+        }
+
+        .scroll-top:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0 20px rgba(0, 217, 255, 0.3);
+        }
+
+        .scroll-top.show {
+            display: flex;
+        }
+
+        /* Interactive Astronaut */
+        .astronaut {
+            position: fixed;
+            width: 80px;
+            height: 80px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 2000;
+            cursor: pointer;
+        }
+
+        .astronaut.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .astronaut-body {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+
+        .astronaut-head {
+            position: absolute;
+            width: 28px;
+            height: 28px;
+            background: linear-gradient(135deg, #f5deb3, #daa520);
+            border-radius: 50%;
+            top: 5px;
+            left: 26px;
+            border: 2px solid rgba(0, 217, 255, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .astronaut-visor {
+            width: 16px;
+            height: 16px;
+            background: linear-gradient(135deg, #00d9ff, #0099cc);
+            border-radius: 50%;
+            box-shadow: 0 0 15px rgba(0, 217, 255, 0.6), inset 0 0 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .astronaut-torso {
+            position: absolute;
+            width: 24px;
+            height: 28px;
+            background: linear-gradient(135deg, #ff6b35, #ff8c5a);
+            border-radius: 5px;
+            top: 35px;
+            left: 28px;
+            border: 1px solid rgba(0, 217, 255, 0.2);
+        }
+
+        .astronaut-arm {
+            position: absolute;
+            width: 8px;
+            height: 20px;
+            background: linear-gradient(135deg, #f5deb3, #daa520);
+            border-radius: 4px;
+            top: 38px;
+        }
+
+        .astronaut-arm.left-arm {
+            left: 8px;
+            transform-origin: top center;
+            animation: armWave 1s ease-in-out infinite;
+        }
+
+        .astronaut-arm.right-arm {
+            right: 8px;
+            transform-origin: top center;
+            animation: armWave 1s ease-in-out infinite 0.5s;
+        }
+
+        .astronaut-leg {
+            position: absolute;
+            width: 8px;
+            height: 16px;
+            background: #333;
+            border-radius: 3px;
+            top: 63px;
+        }
+
+        .astronaut-leg.left-leg {
+            left: 22px;
+        }
+
+        .astronaut-leg.right-leg {
+            right: 22px;
+        }
+
+        @keyframes armWave {
+            0%, 100% {
+                transform: rotate(0deg);
+            }
+            50% {
+                transform: rotate(20deg);
+            }
+        }
+
+        .astronaut.press-button {
+            animation: bounce 0.5s ease;
+        }
+
+        @keyframes bounce {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.2);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .astronaut {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <ul>
+            <li><a onclick="scrollToSection('hero')">Home</a></li>
+            <li><a onclick="scrollToSection('about')">About</a></li>
+            <li><a onclick="scrollToSection('projects')">Projects</a></li>
+            <li><a onclick="scrollToSection('expertise')">Expertise</a></li>
+            <li><a onclick="scrollToSection('contact')">Contact</a></li>
+        </ul>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="hero" class="hero">
+        <div class="stars" id="starfield"></div>
+        <div class="hero-content">
+            <h1 class="hero-title">Aerospace Hardware Engineer</h1>
+            <p class="hero-subtitle">Satellite Power Systems | PCB Design | Embedded Systems</p>
+            <div class="hero-cta">
+                <button class="btn btn-primary" onclick="scrollToSection('projects')">View Work</button>
+                <button class="btn btn-secondary" onclick="scrollToSection('contact')">Get In Touch</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="about">
+        <h2 class="section-title">About Me</h2>
+        <div class="about-content">
+            <div class="about-text">
+                <h3>Hardware Engineer specialized in Aerospace Systems</h3>
+                <p>I design and develop electrical power systems for satellites and space applications. With expertise in power electronics, battery management systems, and signal integrity, I create mission-critical hardware for aerospace missions.</p>
+                <p>Currently developing the XDlinx Power Simulator—a comprehensive tool for satellite power system analysis and optimization. My work spans from conceptual design through PCB layout and firmware implementation.</p>
+            </div>
+            <div class="skills">
+                <div class="skill-item">
+                    <strong>🔌 Power Electronics</strong>
+                    <p>EPS Design, Converters, Rectifiers</p>
+                </div>
+                <div class="skill-item">
+                    <strong>🛰️ Satellite Systems</strong>
+                    <p>CubeSat, Small Satellites, EPS Architecture</p>
+                </div>
+                <div class="skill-item">
+                    <strong>🔋 Battery Management</strong>
+                    <p>Li-ion BMS, Cell Balancing, Thermal Control</p>
+                </div>
+                <div class="skill-item">
+                    <strong>📐 PCB Design</strong>
+                    <p>Altium Designer, Signal Integrity, EMI/EMC</p>
+                </div>
+                <div class="skill-item">
+                    <strong>💻 Embedded Systems</strong>
+                    <p>STM32, Arduino, Firmware Development</p>
+                </div>
+                <div class="skill-item">
+                    <strong>📊 Simulation</strong>
+                    <p>MATLAB/Simulink, Power Analysis, SPENVIS</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Projects Section -->
+    <section id="projects" class="projects">
+        <h2 class="section-title">Featured Projects</h2>
+        <div class="projects-grid">
+            <div class="project-card">
+                <div class="project-icon">🛰️</div>
+                <h3 class="project-title">Satellite EPS Design</h3>
+                <p class="project-desc">Complete electrical power system design for CubeSat applications with multi-source power management and battery charging circuits.</p>
+                <div class="project-tags">
+                    <span class="tag">Power Electronics</span>
+                    <span class="tag">PCB Design</span>
+                    <span class="tag">Altium</span>
+                </div>
+            </div>
+
+            <div class="project-card">
+                <div class="project-icon">🔋</div>
+                <h3 class="project-title">Battery Management System</h3>
+                <p class="project-desc">Advanced Li-ion BMS with cell balancing, temperature monitoring, and safety protection circuits for space missions.</p>
+                <div class="project-tags">
+                    <span class="tag">BMS</span>
+                    <span class="tag">Embedded</span>
+                    <span class="tag">Li-ion</span>
+                </div>
+            </div>
+
+            <div class="project-card">
+                <div class="project-icon">⚡</div>
+                <h3 class="project-title">EMI/EMC Filter Design</h3>
+                <p class="project-desc">High-performance EMI filter design with comprehensive analysis, signal integrity optimization, and aerospace compliance testing.</p>
+                <div class="project-tags">
+                    <span class="tag">EMI/EMC</span>
+                    <span class="tag">Signal Integrity</span>
+                    <span class="tag">Analysis</span>
+                </div>
+            </div>
+
+            <div class="project-card">
+                <div class="project-icon">📊</div>
+                <h3 class="project-title">XDlinx Power Simulator</h3>
+                <p class="project-desc">Comprehensive power system simulation tool for satellite EPS modeling, optimization, and mission analysis with PyQt5 UI.</p>
+                <div class="project-tags">
+                    <span class="tag">Python</span>
+                    <span class="tag">MATLAB</span>
+                    <span class="tag">Simulation</span>
+                </div>
+            </div>
+
+            <div class="project-card">
+                <div class="project-icon">🔌</div>
+                <h3 class="project-title">Power Converter Design</h3>
+                <p class="project-desc">Development of buck-boost converters and DAB circuits for satellite power regulation with efficiency optimization.</p>
+                <div class="project-tags">
+                    <span class="tag">Converters</span>
+                    <span class="tag">DAB</span>
+                    <span class="tag">Efficiency</span>
+                </div>
+            </div>
+
+            <div class="project-card">
+                <div class="project-icon">📡</div>
+                <h3 class="project-title">Radiation Analysis</h3>
+                <p class="project-desc">SPENVIS-based radiation environment assessment and component selection for space mission planning and risk mitigation.</p>
+                <div class="project-tags">
+                    <span class="tag">SPENVIS</span>
+                    <span class="tag">Radiation</span>
+                    <span class="tag">Analysis</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Expertise Section -->
+    <section id="expertise" class="expertise">
+        <h2 class="section-title">Core Expertise</h2>
+        <div class="expertise-grid">
+            <div class="expertise-box">
+                <div class="expertise-icon">🎯</div>
+                <h3 class="expertise-title">Power System Architecture</h3>
+                <p class="expertise-desc">End-to-end satellite EPS design from solar arrays through power distribution, ensuring mission success with redundancy and reliability.</p>
+            </div>
+
+            <div class="expertise-box">
+                <div class="expertise-icon">⚙️</div>
+                <h3 class="expertise-title">Component Selection & Integration</h3>
+                <p class="expertise-desc">Critical evaluation of aerospace-grade components, thermal analysis, and integration testing for harsh space environments.</p>
+            </div>
+
+            <div class="expertise-box">
+                <div class="expertise-icon">📈</div>
+                <h3 class="expertise-title">Performance Optimization</h3>
+                <p class="expertise-desc">Power efficiency maximization, thermal management, and system-level optimization for mission profile requirements.</p>
+            </div>
+
+            <div class="expertise-box">
+                <div class="expertise-icon">🔍</div>
+                <h3 class="expertise-title">Testing & Validation</h3>
+                <p class="expertise-desc">Comprehensive bench testing, environmental testing, compliance verification, and mission scenario simulation.</p>
+            </div>
+
+            <div class="expertise-box">
+                <div class="expertise-icon">📚</div>
+                <h3 class="expertise-title">Technical Documentation</h3>
+                <p class="expertise-desc">Detailed design documentation, user manuals, technical specifications, and compliance reports for aerospace standards.</p>
+            </div>
+
+            <div class="expertise-box">
+                <div class="expertise-icon">🚀</div>
+                <h3 class="expertise-title">Space Mission Planning</h3>
+                <p class="expertise-desc">Orbit analysis, radiation environment assessment, power budget calculation, and mission feasibility studies.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="contact">
+        <div class="contact-content">
+            <h2 class="section-title">Let's Connect</h2>
+            <p class="contact-text">Interested in collaborating on aerospace projects or discussing power systems design? Reach out!</p>
+            <div class="contact-links">
+                <a href="mailto:your.email@example.com" class="contact-link">📧 Email</a>
+                <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" class="contact-link">💼 LinkedIn</a>
+                <a href="https://github.com" target="_blank" rel="noopener noreferrer" class="contact-link">🔗 GitHub</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2025 Aerospace Hardware Engineer. All rights reserved.</p>
+    </footer>
+
+    <!-- Scroll to Top Button -->
+    <button class="scroll-top" id="scrollTopBtn">↑</button>
+
+    <!-- Interactive Astronaut -->
+    <div class="astronaut" id="astronaut">
+        <div class="astronaut-body">
+            <div class="astronaut-head">
+                <div class="astronaut-visor"></div>
+            </div>
+            <div class="astronaut-torso"></div>
+            <div class="astronaut-arm left-arm"></div>
+            <div class="astronaut-arm right-arm"></div>
+            <div class="astronaut-leg left-leg"></div>
+            <div class="astronaut-leg right-leg"></div>
+        </div>
+    </div>
+
+    <script>
+        // Generate random stars
+        function generateStars() {
+            const starfield = document.getElementById('starfield');
+            const starCount = 100;
+            for (let i = 0; i < starCount; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.animationDelay = Math.random() * 3 + 's';
+                starfield.appendChild(star);
+            }
+        }
+
+        // Scroll to section
+        function scrollToSection(sectionId) {
+            const element = document.getElementById(sectionId);
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        // Scroll to top button functionality
+        const scrollTopBtn = document.getElementById('scrollTopBtn');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 300) {
+                scrollTopBtn.classList.add('show');
+            } else {
+                scrollTopBtn.classList.remove('show');
+            }
+        });
+
+        scrollTopBtn.addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
+        // Interactive Astronaut
+        const astronaut = document.getElementById('astronaut');
+        let astronautActive = false;
+
+        // Show astronaut on mouse move
+        document.addEventListener('mousemove', (e) => {
+            if (!astronautActive) {
+                astronaut.classList.add('active');
+                astronautActive = true;
+            }
+            
+            // Position astronaut towards cursor
+            const x = e.clientX;
+            const y = e.clientY;
+            astronaut.style.left = (x - 40) + 'px';
+            astronaut.style.top = (y - 40) + 'px';
+        });
+
+        // Click to press scroll-top button
+        astronaut.addEventListener('click', () => {
+            scrollTopBtn.click();
+            // Animation feedback
+            astronaut.classList.add('press-button');
+            setTimeout(() => {
+                astronaut.classList.remove('press-button');
+            }, 500);
+        });
+
+        // Hide astronaut on mouse leave
+        document.addEventListener('mouseleave', () => {
+            astronaut.classList.remove('active');
+            astronautActive = false;
+        });
+
+        // Initialize stars on page load
+        window.addEventListener('load', generateStars);
+    </script>
+</body>
+</html>
