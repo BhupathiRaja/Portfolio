@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hardware Design Engineer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --color-bg-dark: #0a192f;
+            --color-bg-light: #f0f8ff;
+            --color-text-dark: #ccd6f6;
+            --color-text-light: #1e293b;
+            --color-accent-cyan: #64ffda;
+            --color-accent-lime: #a3e635;
+            --color-card-dark: #112240;
+            --color-card-light: #ffffff;
+            --color-border-dark: #233554;
+            --color-border-light: #cbd5e1;
+        }
+
+        html.dark {
+            --color-bg: var(--color-bg-dark);
+            --color-text: var(--color-text-dark);
+            --color-card: var(--color-card-dark);
+            --color-border: var(--color-border-dark);
+        }
+
+        html:not(.dark) {
+            --color-bg: var(--color-bg-light);
+            --color-text: var(--color-text-light);
+            --color-card: var(--color-card-light);
+            --color-border: var(--color-border-light);
+        }
+
+        body {
+            background-color: var(--color-bg);
+            color: var(--color-text);
+            font-family: 'Roboto Mono', monospace;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        .kinetic-title span {
+            display: inline-block;
+            opacity: 0;
+            transform: translateY(20px) scale(0.9);
+            animation: kinetic-letter-in 0.5s forwards;
+        }
+
+        @keyframes kinetic-letter-in {
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .section-title::after {
+            content: '';
+            display: block;
+            width: 80px;
+            height: 2px;
+            background: var(--color-accent-cyan);
+            margin-top: 0.5rem;
+        }
+
+        .bento-grid-item {
+            background-color: var(--color-card);
+            border: 1px solid var(--color-border);
+            transition: all 0.3s ease;
+        }
+
+        .bento-grid-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            border-color: var(--color-accent-cyan);
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background-color: var(--color-border);
+        }
+
+        .timeline-item {
+            visibility: hidden;
+        }
+
+        .timeline-item.visible {
+            visibility: visible;
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .timeline-dot {
+            background-color: var(--color-bg);
+            border: 3px solid var(--color-accent-cyan);
+        }
+
+        .project-card {
+            background: linear-gradient(145deg, #132647, #0e1d36);
+            border: 1px solid var(--color-border);
+            box-shadow: 5px 5px 15px #08101d, -5px -5px 15px #1a325d;
+            transition: all 0.3s ease;
+        }
+        html:not(.dark) .project-card {
+            background: linear-gradient(145deg, #ffffff, #e6f2ff);
+            box-shadow: 5px 5px 15px #d9e1e8, -5px -5px 15px #ffffff;
+        }
+
+        .project-card:hover {
+            transform: scale(1.03);
+            box-shadow: 0 0 20px var(--color-accent-cyan);
+        }
+
+        .project-card .card-overlay {
+            background: rgba(10, 25, 47, 0.8);
+            transition: opacity 0.3s ease;
+        }
+        html:not(.dark) .project-card .card-overlay {
+            background: rgba(240, 248, 255, 0.8);
+        }
+
+        .modal {
+            background: rgba(10, 25, 47, 0.9);
+            backdrop-filter: blur(10px);
+        }
+        html:not(.dark) .modal {
+            background: rgba(240, 248, 255, 0.9);
+        }
+
+        .modal-content {
+            background-color: var(--color-card);
+            animation: modal-in 0.5s cubic-bezier(0.165, 0.84, 0.44, 1) forwards;
+        }
+
+        @keyframes modal-in {
+            from {
+                opacity: 0;
+                transform: scale(0.9) translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+        
+        #starfield {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        .nav-scrolled {
+            background-color: rgba(10, 25, 47, 0.85);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 10px 30px -10px rgba(2, 12, 27, 0.7);
+        }
+        html:not(.dark) .nav-scrolled {
+            background-color: rgba(240, 248, 255, 0.85);
+        }
+
+        .nav-link {
+            position: relative;
+        }
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -4px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--color-accent-cyan);
+            transition: width 0.3s ease;
+        }
+        .nav-link:hover::after, .nav-link.active::after {
+            width: 100%;
+        }
+    </style>
+</head>
+<body class="antialiased overflow-x-hidden">
+
+    <canvas id="starfield"></canvas>
+
+    <!-- Header -->
+    <header id="navbar" class="fixed top-0 left-0 right-0 z-50 transition-all duration-300">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="#home" class="text-2xl font-bold font-orbitron text-accent-cyan hover:text-accent-lime transition-colors">
+                HDE
+            </a>
+            <div class="hidden md:flex items-center space-x-8">
+                <a href="#about" class="nav-link text-sm tracking-wider hover:text-accent-cyan transition-colors">About</a>
+                <a href="#projects" class="nav-link text-sm tracking-wider hover:text-accent-cyan transition-colors">Projects</a>
+                <a href="#expertise" class="nav-link text-sm tracking-wider hover:text-accent-cyan transition-colors">Expertise</a>
+                <a href="#experience" class="nav-link text-sm tracking-wider hover:text-accent-cyan transition-colors">Experience</a>
+                <a href="#tools" class="nav-link text-sm tracking-wider hover:text-accent-cyan transition-colors">Tools</a>
+            </div>
+            <div class="flex items-center space-x-4">
+                <button id="theme-toggle" class="p-2 rounded-full hover:bg-card-dark transition-colors">
+                    <svg id="theme-toggle-dark-icon" class="w-5 h-5 hidden" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+                    <svg id="theme-toggle-light-icon" class="w-5 h-5 hidden" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" fill-rule="evenodd" clip-rule="evenodd"></path></svg>
+                </button>
+                <a href="mailto:m.bhupathiraja@gmail.com" target="_blank" class="px-4 py-2 border border-accent-cyan text-accent-cyan rounded-md text-sm hover:bg-accent-cyan hover:bg-opacity-10 transition-all">Contact Me</a>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto px-6 md:px-12 lg:px-24">
+        <!-- Hero Section -->
+        <section id="home" class="min-h-screen flex flex-col justify-center items-start">
+            <!--<h3 class="text-lg text-accent-cyan mb-4 font-mono reveal">Aerospace Specialist</h3> -->
+            <h1 class="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-gray-400 dark:text-blue-500 kinetic-title reveal">Hardware Design</h1>
+            <h2 class="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-gray-400 dark:text-blue-500 kinetic-title reveal">Engineer</h2>
+            <p class="mt-6 max-w-xl text-text-dark dark:text-gray-400 reveal">I work on high-reliability power electronics for EV chargers and CubeSat power systems, covering power-stage circuitry, control interfaces, and custom PCB engineering.</p>
+        </section>
+
+        <!-- About Section -->
+        <section id="about" class="py-24">
+            <h2 class="section-title text-3xl font-bold mb-8 text-text-dark dark:text-white reveal">About Me</h2>
+            <div class="grid md:grid-cols-5 gap-10 items-center">
+                <div class="md:col-span-3 text-base leading-relaxed space-y-4 reveal">
+                    <p>I’m an EEE graduate with strong interests in power electronics, battery systems, and advanced energy conversion for EV and aerospace applications.</p>
+                    <p>I’ve worked on simulation and control of systems like DC fast chargers, multilevel inverters, and Solid-State Transformers (SSTs) using tools like MATLAB/Simulink and LTspice.</p>
+                    <p>I also explore Li-ion battery behavior in LEO and radiation-hardened design for high-reliability applications.</p>
+                </div>
+                <div class="md:col-span-2 flex justify-center items-center reveal">
+                    <div class="w-64 h-64 rounded-full border-2 border-accent-cyan p-2 relative group">
+                        <img src="https://media.licdn.com/dms/image/v2/D5603AQGo1PDQJGM0Pw/profile-displayphoto-scale_400_400/B56Zgi6WRmHkAg-/0/1752932380902?e=1764806400&v=beta&t=_tqgZZ5MENRdHOgLA5lPeYPGBKcn8BVJ2OEr6d45kvI" alt="Engineer Portrait" class="w-full h-full object-cover rounded-full grayscale group-hover:grayscale-0 transition-all duration-300">
+                        <div class="absolute inset-0 rounded-full bg-accent-cyan opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- Projects -->
+            <section id="projects" class="py-24 reveal">
+            <h2 class="section-title text-3xl font-bold mb-6 text-center text-text-dark dark:text-white">Featured Projects</h2>
+            <div class="projects-wrap">
+                <div id="projects-slider" class="project-slider flex gap-6 overflow-x-auto px-6 pb-12 snap-x snap-mandatory scrollbar-hide" tabindex="0" aria-label="Featured projects">
+                <!-- Project Cards: Add data-project JSON for modal -->
+                <div tabindex="0" class="project-card min-w-[120px] flex-shrink-0 rounded-lg overflow-hidden bg-gradient-to-br from-[#132647] to-[#0e1d36] border border-border shadow-lg cursor-pointer snap-center" 
+                    data-project='{"id":"project1","title":"DC-DC converter/Regulator","bg":"Project_Images/PCB_3d.png","tech":["DC-DC","Power Stage","PCB"],"desc":"High-speed DC-DC converter and regulator design for space-grade applications; focus on efficiency, thermal and radiation robustness."}'>
+                    <img src="Project_Images/PCB_3d.png" alt="DC-DC converter" class="w-full h-44 object-cover" />
+                    <div class="p-6">
+                    <h3 class="text-xl font-bold mb-2 text-text-dark dark:text-white">DC-DC converter/Regulator</h3>
+                    <p class="text-sm muted">High-speed data processing unit for a LEO satellite constellation.</p>
+                    </div>
+                </div>
+                <div tabindex="0" class="project-card min-w-[120px] flex-shrink-0 rounded-lg overflow-hidden bg-gradient-to-br from-[#3a558d] to-[#22315a] border border-border shadow-lg cursor-pointer snap-center"
+                    data-project='{"id":"project2","title":"Power & Energy Budget Analysis","bg":"https://images.unsplash.com/photo-1581092919534-8253f3d5955a?q=80&w=1600&auto=format&fit=crop","tech":["Modeling","LEOP","Energy Margin"],"desc":"Mission planning and operations analysis including CONOPS, LEOPS and spacecraft energy-margin assessment."}'>
+                    <img src="https://images.unsplash.com/photo-1581092919534-8253f3d5955a?q=80&w=1200&auto=format&fit=crop" alt="Power budget" class="w-full h-44 object-cover" />
+                    <div class="p-6">
+                    <h3 class="text-xl font-bold mb-2 text-text-dark dark:text-white">Power & Energy Budget Analysis</h3>
+                    <p class="text-sm muted">Mission planning and operations analysis and energy-margin assessment.</p>
+                    </div>
+                </div>
+                <div tabindex="0" class="project-card min-w-[120px] flex-shrink-0 rounded-lg overflow-hidden bg-gradient-to-br from-[#253a2e] to-[#1a2720] border border-border shadow-lg cursor-pointer snap-center"
+                    data-project='{"id":"project3","title":"Radiation Effects & Solar-Cell Performance Analysis","bg":"https://images.unsplash.com/photo-1517976487-151227b49895?q=80&w=1600&auto=format&fit=crop","tech":["Radiation","SPENVIS","OMERE"],"desc":"Radiation analysis (fluence/TID) and solar-cell degradation/performance assessment for LEO missions."}'>
+                    <img src="https://images.unsplash.com/photo-1517976487-151227b49895?q=80&w=1200&auto=format&fit=crop" alt="Radiation analysis" class="w-full h-44 object-cover" />
+                    <div class="p-6">
+                    <h3 class="text-xl font-bold mb-2 text-text-dark dark:text-white">Radiation Effects & Solar-Cell Performance</h3>
+                    <p class="text-sm muted">Performed radiation and solar-cell performance analysis using OMERE & SPENVIS.</p>
+                    </div>
+                </div>
+                <div tabindex="0" class="project-card min-w-[120px] flex-shrink-0 rounded-lg overflow-hidden bg-gradient-to-br from-[#172f2f] to-[#0b1f1f] border border-border shadow-lg cursor-pointer snap-center"
+                    data-project='{"id":"project4","title":"SST Based DC Fast Charger","bg":"https://images.unsplash.com/photo-1523475496153-3d6cc2f7d2a2?q=80&w=1600&auto=format&fit=crop","tech":["SST","Converter Topology","Control"],"desc":"Complete design and implementation of an SST-based DC fast charger with topology selection and control strategy."}'>
+                    <img src="https://images.unsplash.com/photo-1523475496153-3d6cc2f7d2a2?q=80&w=1200&auto=format&fit=crop" alt="SST charger" class="w-full h-44 object-cover" />
+                    <div class="p-6">
+                    <h3 class="text-xl font-bold mb-2 text-text-dark dark:text-white">SST Based DC Fast Charger</h3>
+                    <p class="text-sm muted">Executed the complete design and analysis of a Solid-State Transformer (SST)-based DC fast charger.</p>
+                    </div>
+                </div>
+                <div tabindex="0" class="project-card min-w-[120px] flex-shrink-0 rounded-lg overflow-hidden bg-gradient-to-br from-[#2c3e50] to-[#34495e] border border-border shadow-lg cursor-pointer snap-center"
+                    data-project='{"id":"project5","title":"Designed EMI Filter","bg":"https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=1600&auto=format&fit=crop","tech":["EMI","Filter Design","Insertion Loss"],"desc":"Developed EMI filters using Murata\'s tools; performed insertion-loss and noise-spectrum analysis."}'>
+                    <img src="https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=1200&auto=format&fit=crop" alt="EMI filter" class="w-full h-44 object-cover" />
+                    <div class="p-6">
+                    <h3 class="text-xl font-bold mb-2 text-text-dark dark:text-white">Designed EMI Filter</h3>
+                    <p class="text-sm muted">EMI filter development and optimization for power electronics applications.</p>
+                    </div>
+                </div>
+                <div tabindex="0" class="project-card min-w-[120px] flex-shrink-0 rounded-lg overflow-hidden bg-gradient-to-br from-[#3c2f2f] to-[#502020] border border-border shadow-lg cursor-pointer snap-center"
+                    data-project='{"id":"project6","title":"FMEA, Reliability, Derating Analysis","bg":"https://images.unsplash.com/photo-1555949963-aa79dcee981d?q=80&w=1600&auto=format&fit=crop","tech":["FMEA","Reliability","Derating"],"desc":"FMEA, reliability evaluation and derating analysis to improve system safety and component lifetime."}'>
+                    <img src="https://images.unsplash.com/photo-1555949963-aa79dcee981d?q=80&w=1200&auto=format&fit=crop" alt="FMEA reliability" class="w-full h-44 object-cover" />
+                    <div class="p-6">
+                    <h3 class="text-xl font-bold mb-2 text-text-dark dark:text-white">FMEA, Reliability, and Derating analysis</h3>
+                    <p class="text-sm muted">Conducted FMEA, reliability evaluation, and derating analysis to mitigate failures.</p>
+                    </div>
+                </div>
+                </div>
+            </div>
+            </section>
+
+        <!-- Modal for project details -->
+        <div id="project-modal" class="modal-backdrop fixed inset-0 bg-black bg-opacity-70 hidden items-center justify-center z-50" role="dialog" aria-modal="true" aria-labelledby="modal-title" tabindex="-1">
+        <div class="modal-center max-w-4xl w-full bg-card rounded-lg shadow-xl overflow-hidden transform transition-transform scale-95 opacity-0">
+            <div id="modal-hero" class="modal-hero h-64 bg-cover bg-center" style="filter: contrast(0.95) saturate(0.95);"></div>
+            <div class="modal-body p-6 max-h-[60vh] overflow-auto relative">
+            <button id="modal-close" aria-label="Close" class="absolute top-3 right-4 text-3xl font-bold text-accent-cyan hover:text-accent-lime cursor-pointer">&times;</button>
+            <h2 id="modal-title" class="text-2xl font-bold mb-3 text-text-dark dark:text-white"></h2>
+            <div id="modal-tech" class="flex flex-wrap gap-2 mb-4"></div>
+            <p id="modal-desc" class="text-muted"></p>
+            </div>
+        </div>
+        </div>
+
+        <!-- Professional Experience Section -->
+        <section id="experience" class="py-24">
+            <h2 class="section-title text-3xl font-bold mb-16 text-center text-text-dark dark:text-white reveal">Professional Experience</h2>
+            <div class="relative timeline">
+                <!-- Item 1 -->
+                <div class="timeline-item mb-16 flex md:justify-end md:pr-8">
+                    <div class="w-full md:w-5/12">
+                        <div class="bento-grid-item p-6 rounded-lg">
+                            <p class="text-accent-cyan text-sm">2018 - Present</p>
+                            <h3 class="text-xl font-bold mt-1 text-text-dark dark:text-white">Senior Hardware Engineer</h3>
+                            <p class="text-md font-semibold text-gray-400 dark:text-gray-400">Astra Dynamics</p>
+                            <p class="text-sm mt-2 text-gray-400 dark:text-gray-400">Led the design of avionics for next-generation launch vehicles, focusing on fault-tolerant systems and high-speed data acquisition.</p>
+                        </div>
+                    </div>
+                    <div class="absolute left-1/2 -translate-x-1/2 mt-3 w-6 h-6 rounded-full timeline-dot"></div>
+                </div>
+                <!-- Item 2 -->
+                <div class="timeline-item mb-16 flex">
+                    <div class="w-full md:w-5/12 md:ml-auto md:pl-8">
+                        <div class="bento-grid-item p-6 rounded-lg">
+                            <p class="text-accent-cyan text-sm">2015 - 2018</p>
+                            <h3 class="text-xl font-bold mt-1 text-text-dark dark:text-white">Hardware Design Engineer</h3>
+                            <p class="text-md font-semibold text-gray-400 dark:text-gray-400">Orion Aerospace</p>
+                            <p class="text-sm mt-2 text-gray-400 dark:text-gray-400">Developed and validated PCB assemblies for satellite communication payloads, improving signal integrity by 20% on critical high-speed links.</p>
+                        </div>
+                    </div>
+                    <div class="absolute left-1/2 -translate-x-1/2 mt-3 w-6 h-6 rounded-full timeline-dot"></div>
+                </div>
+                <!-- Item 3 -->
+                <div class="timeline-item flex md:justify-end md:pr-8">
+                    <div class="w-full md:w-5/12">
+                        <div class="bento-grid-item p-6 rounded-lg">
+                            <p class="text-accent-cyan text-sm">2013 - 2015</p>
+                            <h3 class="text-xl font-bold mt-1 text-text-dark dark:text-white">Junior Engineer</h3>
+                            <p class="text-md font-semibold text-gray-400 dark:text-gray-400">Galactic Innovations</p>
+                            <p class="text-sm mt-2 text-gray-400 dark:text-gray-400">Assisted in the prototyping and testing of embedded systems for drone guidance systems. Contributed to schematic capture and component selection.</p>
+                        </div>
+                    </div>
+                    <div class="absolute left-1/2 -translate-x-1/2 mt-3 w-6 h-6 rounded-full timeline-dot"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tools & Methodologies Section -->
+        <section id="tools" class="py-24">
+            <h2 class="section-title text-3xl font-bold mb-12 text-text-dark dark:text-white">Tools & Methodologies</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="reveal">
+                    <h3 class="text-xl font-bold text-accent-cyan mb-4">EDA Tools</h3>
+                    <ul class="space-y-2 text-gray-400 dark:text-gray-400">
+                        <li>Altium Designer</li>
+                        <li>Cadence Allegro / OrCAD</li>
+                        <li>KiCad</li>
+                    </ul>
+                </div>
+                <div class="reveal">
+                    <h3 class="text-xl font-bold text-accent-cyan mb-4 text-text-dark dark:text-white">Simulation & Analysis</h3>
+                    <ul class="space-y-2 text-gray-400 dark:text-gray-400">
+                        <li>LTspice / PSpice</li>
+                        <li>MATLAB & Simulink</li>
+                        <li>Ansys HFSS</li>
+                    </ul>
+                </div>
+                <div class="reveal">
+                    <h3 class="text-xl font-bold text-accent-cyan mb-4 text-text-dark dark:text-white">Languages & Methodologies</h3>
+                    <ul class="space-y-2 text-gray-400 dark:text-gray-400">
+                        <li>VHDL, Verilog, C/C++</li>
+                        <li>Python (for test automation)</li>
+                        <li>Agile, DFMEA, DFM/DFA</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Education Section -->
+        <section id="education" class="py-24">
+            <h2 class="section-title text-3xl font-bold mb-12 text-center reveal">Education & Certifications</h2>
+            <div class="max-w-3xl mx-auto space-y-6">
+                <div class="bento-grid-item p-6 rounded-lg reveal">
+                    <h3 class="text-xl font-bold ">M.S. in Electrical Engineering</h3>
+                    <p class="text-accent-cyan">Stanford University</p>
+                </div>
+                <div class="bento-grid-item p-6 rounded-lg reveal">
+                    <h3 class="text-xl font-bold">B.S. in Computer Engineering</h3>
+                    <p class="text-accent-cyan">Georgia Institute of Technology</p>
+                </div>
+                <div class="bento-grid-item p-6 rounded-lg reveal">
+                    <h3 class="text-xl font-bold text-text-dark dark:text-white">Certified Interconnect Designer (CID)</h3>
+                    <p class="text-accent-cyan">IPC</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="py-16 text-center">
+        <h3 class="text-3xl font-bold mb-4 reveal">Get In Touch</h3>
+        <p class="max-w-lg mx-auto mb-8 text-gray-400 dark:text-gray-400 reveal">I'm always open to discussing new projects, creative ideas, or opportunities to be part of an ambitious vision. Feel free to reach out.</p>
+        <a href="mailto:contact@example.com" target="_blank" class="inline-block px-8 py-4 border border-accent-cyan text-accent-cyan rounded-md hover:bg-accent-cyan hover:bg-opacity-10 transition-all reveal">Say Hello</a>
+    </footer>
+
+    <!-- Back to Top Button -->
+    <button id="back-to-top" class="fixed bottom-8 right-8 bg-accent-cyan bg-opacity-20 text-accent-cyan p-3 rounded-full hidden hover:bg-opacity-40 transition-all">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
+        </svg>
+    </button>
+
+    <!-- Project Modals -->
+    <div id="modal-container">
+        <!-- Modal 1 -->
+        <div id="project1" class="modal fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black bg-opacity-70">
+            <div class="modal-content max-w-xl w-full rounded-lg shadow-lg overflow-hidden bg-card relative">
+                <div class="p-8 relative">
+                    <button class="modal-close absolute top-4 right-4 text-text-dark dark:text-gray-400 hover:text-accent-cyan text-3xl font-bold cursor-pointer">&times;</button>
+                    <h2 class="text-3xl font-bold mb-4 text-text-dark dark:text-white">LEO Satellite Comms Subsystem</h2>
+                    <img src="https://images.unsplash.com/photo-1614369472113-010a2b452696?q=80&w=1200&auto=format&fit=crop" alt="Satellite Communication" class="w-full h-64 object-cover rounded-lg mb-6">
+                    <p class="text-text-dark dark:text-gray-400 mb-4">This project involved the end-to-end design of a high-throughput communication board for a LEO satellite. Key responsibilities included architecting the digital processing core, implementing a high-speed DDR4 memory interface, and ensuring signal integrity for 28 Gbps SERDES channels.</p>
+                    <p class="text-text-dark dark:text-gray-400 mb-4">The final design passed rigorous thermal and vibration testing, achieving a 50% increase in data throughput compared to the previous generation while maintaining the same power envelope.</p>
+                </div>
+            </div>
+        </div>
+        <!-- Modal 2 -->
+        <div id="project2" class="modal fixed inset-0 z-50 hidden items-center justify-center p-4">
+            <div class="modal-content max-w-xl w-full rounded-lg shadow-lg overflow-hidden">
+                <div class="p-8 relative">
+                    <button class="modal-close absolute top-4 right-4 text-text-dark dark:text-gray-400 hover:text-accent-cyan">&times;</button>
+                    <h2 class="text-3xl font-bold mb-4 text-text-dark dark:text-white">Avionics Power Management</h2>
+                    <img src="https://images.unsplash.com/photo-1581092919534-8253f3d5955a?q=80&w=1200&auto=format&fit=crop" alt="Avionics Power Unit" class="w-full h-64 object-cover rounded-lg mb-6">
+                    <p class="text-text-dark dark:text-gray-400 mb-4">Designed a redundant, fault-tolerant Power Management Unit (PMU) for critical avionics systems. The design featured hot-swappable modules, precise current monitoring, and a CAN bus interface for system health reporting.</p>
+                    <p class="text-text-dark dark:text-gray-400 mb-4">Successfully achieved DO-254 compliance for complex electronic hardware in airborne systems. The modular design reduced maintenance time by 75%.</p>
+                </div>
+            </div>
+        </div>
+        <!-- Modal 3 -->
+        <div id="project3" class="modal fixed inset-0 z-50 hidden items-center justify-center p-4">
+            <div class="modal-content max-w-xl w-full rounded-lg shadow-lg overflow-hidden">
+                <div class="p-8 relative">
+                    <button class="modal-close absolute top-4 right-4 text-text-dark dark:text-gray-400 hover:text-accent-cyan">&times;</button>
+                    <h2 class="text-3xl font-bold mb-4 text-text-dark dark:text-white">Deep Space RF Transceiver</h2>
+                    <img src="https://images.unsplash.com/photo-1517976487-151227b49895?q=80&w=1200&auto=format&fit=crop" alt="Deep Space Probe" class="w-full h-64 object-cover rounded-lg mb-6">
+                    <p class="text-text-dark dark:text-gray-400 mb-4">Developed a custom X-band RF front-end for a deep space probe, focusing on ultra-low noise figure and high linearity under extreme temperature variations. The project required meticulous component selection, custom filter design, and impedance matching for maximum power transfer.</p>
+                    <p class="text-text-dark dark:text-gray-400 mb-4">The resulting transceiver demonstrated a receiver sensitivity exceeding requirements by 3 dB, significantly extending the probe's communication range.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+            
+            // Modal logic for featured projects
+            const modal = document.getElementById('project-modal');
+            const modalHero = document.getElementById('modal-hero');
+            const modalTitle = document.getElementById('modal-title');
+            const modalTech = document.getElementById('modal-tech');
+            const modalDesc = document.getElementById('modal-desc');
+            const modalClose = document.getElementById('modal-close');
+
+            function openModal(projectData) {
+            modalHero.style.backgroundImage = `linear-gradient(180deg, rgba(0,0,0,.14), rgba(0,0,0,.06)), url('${projectData.bg}')`;
+            modalTitle.textContent = projectData.title || '';
+            modalDesc.textContent = projectData.desc || '';
+
+            modalTech.innerHTML = '';
+            (projectData.tech || []).forEach(t => {
+                const tag = document.createElement('span');
+                tag.className = 'px-3 py-1 rounded bg-white/10 text-sm text-accent-cyan';
+                tag.textContent = t;
+                modalTech.appendChild(tag);
+            });
+
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            setTimeout(() => { // Animate modal scale and opacity 
+                document.querySelector('.modal-center').style.transform = 'scale(1)';
+                document.querySelector('.modal-center').style.opacity = '1';
+            }, 10);
+
+            document.body.style.overflow = 'hidden';
+            modal.focus();
+            }
+
+            function closeModal() {
+            const modalContent = document.querySelector('.modal-center');
+            modalContent.style.transform = 'scale(0.95)';
+            modalContent.style.opacity = '0';
+            setTimeout(() => {
+                modal.classList.remove('flex');
+                modal.classList.add('hidden');
+                document.body.style.overflow = '';
+            }, 300);
+            }
+
+            document.querySelectorAll('.project-card').forEach(card => {
+            card.addEventListener('click', () => {
+                try {
+                const data = JSON.parse(card.getAttribute('data-project'));
+                openModal(data);
+                } catch(e) {
+                console.error("Invalid project JSON", e);
+                }
+            });
+            card.addEventListener('keydown', e => {
+                if(e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                card.click();
+                }
+            });
+            });
+
+            modalClose.addEventListener('click', closeModal);
+            modal.addEventListener('click', (e) => {
+            if(e.target === modal) {
+                closeModal();
+            }
+            });
+            window.addEventListener('keydown', (e) => {
+            if(e.key === 'Escape' && !modal.classList.contains('hidden')) {
+                closeModal();
+            }
+            });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- Theme Toggle ---
+            const themeToggleBtn = document.getElementById('theme-toggle');
+            const darkIcon = document.getElementById('theme-toggle-dark-icon');
+            const lightIcon = document.getElementById('theme-toggle-light-icon');
+
+            if (localStorage.getItem('color-theme') === 'light' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: light)').matches)) {
+                document.documentElement.classList.remove('dark');
+                lightIcon.classList.remove('hidden');
+            } else {
+                document.documentElement.classList.add('dark');
+                darkIcon.classList.remove('hidden');
+            }
+
+            themeToggleBtn.addEventListener('click', () => {
+                darkIcon.classList.toggle('hidden');
+                lightIcon.classList.toggle('hidden');
+                if (localStorage.getItem('color-theme')) {
+                    if (localStorage.getItem('color-theme') === 'light') {
+                        document.documentElement.classList.add('dark');
+                        localStorage.setItem('color-theme', 'dark');
+                    } else {
+                        document.documentElement.classList.remove('dark');
+                        localStorage.setItem('color-theme', 'light');
+                    }
+                } else {
+                    if (document.documentElement.classList.contains('dark')) {
+                        document.documentElement.classList.remove('dark');
+                        localStorage.setItem('color-theme', 'light');
+                    } else {
+                        document.documentElement.classList.add('dark');
+                        localStorage.setItem('color-theme', 'dark');
+                    }
+                }
+            });
+
+            // --- Starfield Background ---
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 1000);
+            camera.position.z = 1;
+            const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('starfield'), alpha: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+
+            const starGeo = new THREE.BufferGeometry();
+            const starCount = 6000;
+            const posArray = new Float32Array(starCount * 3);
+            for (let i = 0; i < starCount * 3; i++) {
+                posArray[i] = (Math.random() - 0.5) * 1000;
+            }
+            starGeo.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+            const starMaterial = new THREE.PointsMaterial({ size: 0.7, color: 0xaaaaaa });
+            const stars = new THREE.Points(starGeo, starMaterial);
+            scene.add(stars);
+
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+
+            function animateStars() {
+                stars.rotation.x += 0.0001;
+                stars.rotation.y += 0.0001;
+                renderer.render(scene, camera);
+                requestAnimationFrame(animateStars);
+            }
+            animateStars();
+
+            // --- Navbar Scroll Effect ---
+            const navbar = document.getElementById('navbar');
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 50) {
+                    navbar.classList.add('nav-scrolled');
+                } else {
+                    navbar.classList.remove('nav-scrolled');
+                }
+            });
+
+            // --- Active Nav Link on Scroll ---
+            const sections = document.querySelectorAll('section');
+            const navLinks = document.querySelectorAll('.nav-link');
+            const observerOptions = { root: null, rootMargin: '0px', threshold: 0.4 };
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        navLinks.forEach(link => {
+                            link.classList.remove('active');
+                            if (link.getAttribute('href').substring(1) === entry.target.id) {
+                                link.classList.add('active');
+                            }
+                        });
+                    }
+                });
+            }, observerOptions);
+            sections.forEach(section => observer.observe(section));
+
+            // --- Kinetic Title Effect ---
+            document.querySelectorAll('.kinetic-title').forEach(title => {
+                const text = title.textContent;
+                title.innerHTML = '';
+                text.split('').forEach((letter, i) => {
+                    const span = document.createElement('span');
+                    span.textContent = letter === ' ' ? '\u00A0' : letter;
+                    span.style.animationDelay = `${i * 0.05}s`;
+                    title.appendChild(span);
+                });
+            });
+
+            // --- General Reveal Animation ---
+            const revealElements = document.querySelectorAll('.reveal');
+            const revealObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.visibility = 'visible';
+                        entry.target.style.animation = 'fadeIn 0.8s ease-out forwards';
+                        revealObserver.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.1 });
+            revealElements.forEach(el => {
+                el.style.visibility = 'hidden';
+                revealObserver.observe(el);
+            });
+
+            // --- Timeline Animation ---
+            const timelineItems = document.querySelectorAll('.timeline-item');
+            const timelineObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                        timelineObserver.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.5 });
+            timelineItems.forEach(item => timelineObserver.observe(item));
+
+            // --- Modal Logic ---
+            const projectCards = document.querySelectorAll('.project-card');
+            const modals = document.querySelectorAll('.modal');
+            const closeButtons = document.querySelectorAll('.modal-close');
+
+            projectCards.forEach(card => {
+                card.addEventListener('click', () => {
+                    const targetId = card.dataset.modalTarget;
+                    const modal = document.getElementById(targetId);
+                    if (modal) {
+                        modal.classList.remove('hidden');
+                        modal.classList.add('flex');
+                        document.body.style.overflow = 'hidden';
+                    }
+                });
+            });
+
+            const closeModal = (modal) => {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+                document.body.style.overflow = '';
+            };
+
+            closeButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    closeModal(button.closest('.modal'));
+                });
+            });
+
+            modals.forEach(modal => {
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) {
+                        closeModal(modal);
+                    }
+                });
+            });
+
+            // --- Back to Top Button ---
+            const backToTopButton = document.getElementById('back-to-top');
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 300) {
+                    backToTopButton.classList.remove('hidden');
+                } else {
+                    backToTopButton.classList.add('hidden');
+                }
+            });
+            backToTopButton.addEventListener('click', () => {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+        });
+    </script>
+</body>
+</html>
