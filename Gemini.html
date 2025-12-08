@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hardware Design Engineer</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Rajdhani:wght@300;500;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --bg-deep: #020408;
+            --neon-blue: #00f3ff;
+            --neon-amber: #ff9e00;
+            --neon-green: #00ff9d;
+            --neon-pink: #ff0055;
+            --neon-purple: #bc13fe;
+            --glass-panel: rgba(10, 20, 30, 0.85);
+            --border-glow: 0 0 10px rgba(0, 243, 255, 0.5);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
+
+        body {
+            overflow: hidden;
+            background-color: var(--bg-deep);
+            font-family: 'Rajdhani', sans-serif;
+            color: #e0e0e0;
+        }
+
+        #canvas-container {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 1;
+            cursor: crosshair;
+        }
+
+        /* --- UI Overlay --- */
+        #ui-layer {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 10;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        /* Header */
+        header {
+            padding: 2.5rem;
+            pointer-events: auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(180deg, rgba(0,0,0,0.9) 0%, transparent 100%);
+        }
+
+        .brand {
+            border-left: 4px solid var(--neon-amber);
+            padding-left: 15px;
+        }
+
+        .brand h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            font-size: 2.5rem;
+            letter-spacing: 4px;
+            color: #fff;
+            text-transform: uppercase;
+        }
+
+        .brand span {
+            font-family: 'Share Tech Mono', monospace;
+            color: var(--neon-blue);
+            letter-spacing: 2px;
+            font-size: 0.9rem;
+        }
+
+        /* Sound Toggle */
+        #sound-toggle {
+            background: transparent;
+            border: 1px solid var(--neon-blue);
+            color: var(--neon-blue);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.3s;
+            margin-right: 20px;
+        }
+        #sound-toggle:hover { background: var(--neon-blue); color: #000; box-shadow: var(--border-glow); }
+
+        /* Nav */
+        .nav-container { display: flex; gap: 15px; }
+        .nav-btn {
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #fff;
+            padding: 12px 25px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.8rem;
+            letter-spacing: 2px;
+            cursor: pointer;
+            transition: all 0.3s;
+            clip-path: polygon(10% 0, 100% 0, 100% 70%, 90% 100%, 0 100%, 0 30%);
+        }
+        .nav-btn:hover {
+            background: rgba(0, 243, 255, 0.2);
+            border-color: var(--neon-blue);
+            text-shadow: 0 0 8px var(--neon-blue);
+        }
+        .nav-btn.active {
+            background: var(--neon-blue);
+            color: #000;
+            font-weight: 700;
+        }
+
+        /* Panels */
+        .content-panel {
+            position: absolute;
+            top: 50%; right: 5%;
+            transform: translateY(-50%) perspective(1000px) rotateY(-10deg) translateX(100px);
+            width: 500px;
+            background: var(--glass-panel);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            padding: 2rem;
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+            box-shadow: 0 0 30px rgba(0,0,0,0.8);
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .content-panel::-webkit-scrollbar { width: 5px; }
+        .content-panel::-webkit-scrollbar-track { background: rgba(0,0,0,0.3); }
+        .content-panel::-webkit-scrollbar-thumb { background: var(--neon-blue); }
+
+        .content-panel.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(-50%) perspective(1000px) rotateY(0deg) translateX(0);
+            pointer-events: auto;
+        }
+        
+        .content-panel::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 2px;
+            background: linear-gradient(90deg, transparent, var(--neon-blue), transparent);
+        }
+        .content-panel::after {
+            content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 2px;
+            background: linear-gradient(90deg, transparent, var(--neon-amber), transparent);
+        }
+
+        .panel-header h2 {
+            font-family: 'Orbitron';
+            color: #fff;
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+        .panel-header .subtitle {
+            font-family: 'Share Tech Mono';
+            color: var(--neon-amber);
+            font-size: 0.8rem;
+            display: block;
+            margin-bottom: 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 10px;
+        }
+
+        /* Holographic Image */
+        .holo-profile-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+            position: relative;
+        }
+        
+        .holo-frame {
+            position: relative;
+            width: 150px;
+            height: 150px;
+            border: 2px solid var(--neon-blue);
+            border-radius: 50%;
+            padding: 5px;
+            background: rgba(0, 243, 255, 0.1);
+            box-shadow: 0 0 20px rgba(0, 243, 255, 0.3);
+            overflow: hidden;
+        }
+
+        .holo-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+            filter: grayscale(100%) contrast(1.2) brightness(0.8);
+            opacity: 0.9;
+        }
+        
+        .holo-frame::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(180deg, rgba(0, 243, 255, 0) 0%, rgba(0, 243, 255, 0.2) 50%, rgba(0, 243, 255, 0) 100%);
+            background-size: 100% 200%;
+            animation: scan 3s linear infinite;
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        @keyframes scan { 0% { background-position: 0% -100%; } 100% { background-position: 0% 200%; } }
+
+        /* Project Cards */
+        .project-card {
+            background: rgba(255,255,255,0.03);
+            border-left: 3px solid var(--neon-green);
+            margin-bottom: 10px;
+            transition: 0.3s;
+            cursor: pointer;
+        }
+        .project-card:hover { background: rgba(255,255,255,0.08); }
+        
+        .project-header {
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .project-header h3 { font-size: 1rem; color: #fff; font-weight: 500; }
+        .project-header i { color: var(--neon-green); transition: 0.3s; }
+
+        .project-details {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease-out;
+            background: rgba(0,0,0,0.3);
+        }
+        .project-details p {
+            padding: 15px;
+            font-size: 0.9rem;
+            color: #ccc;
+            line-height: 1.4;
+            border-top: 1px solid rgba(255,255,255,0.05);
+        }
+        .project-card.active .project-details { max-height: 200px; }
+        .project-card.active .project-header i { transform: rotate(180deg); }
+
+        /* Experience Items */
+        .exp-item {
+            border-left: 2px solid var(--neon-purple);
+            padding-left: 15px;
+            margin-bottom: 20px;
+            position: relative;
+        }
+        .exp-item::before {
+            content: '';
+            position: absolute; left: -6px; top: 0;
+            width: 10px; height: 10px;
+            background: var(--neon-purple);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--neon-purple);
+        }
+        .exp-role { color: white; font-size: 1.1rem; margin-bottom: 5px; font-weight: bold; }
+        .exp-company { color: var(--neon-purple); font-family: 'Share Tech Mono'; font-size: 0.9rem; margin-bottom: 10px; }
+        .exp-desc { color: #ccc; font-size: 0.9rem; line-height: 1.5; }
+
+        /* Tech Arsenal */
+        .tech-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+        .tech-item {
+            background: rgba(0, 243, 255, 0.05);
+            border: 1px solid rgba(0, 243, 255, 0.2);
+            padding: 10px;
+            text-align: center;
+            font-size: 0.85rem;
+            font-family: 'Share Tech Mono';
+            transition: 0.3s;
+            color: var(--neon-blue);
+        }
+        .tech-item:hover { background: var(--neon-blue); color: #000; box-shadow: 0 0 10px var(--neon-blue); }
+
+        /* Contact */
+        .contact-card {
+            background: rgba(255,255,255,0.05);
+            padding: 2rem;
+            text-align: center;
+            border: 1px solid var(--neon-pink);
+        }
+        .contact-btn {
+            display: flex; align-items: center; justify-content: center;
+            width: 100%; padding: 15px; margin-top: 15px;
+            background: transparent; border: 1px solid var(--neon-blue);
+            color: white; font-family: 'Orbitron'; text-decoration: none;
+            transition: 0.3s; text-transform: uppercase; font-size: 0.9rem;
+        }
+        .contact-btn:hover { background: var(--neon-blue); color: black; box-shadow: 0 0 15px var(--neon-blue); }
+        .contact-btn i { margin-right: 10px; font-size: 1.2rem; }
+
+        .close-btn {
+            position: absolute; top: 15px; right: 15px;
+            background: none; border: none; color: #555; font-size: 1.2rem; cursor: pointer;
+        }
+        .close-btn:hover { color: var(--neon-pink); }
+
+        /* --- RADAR VISUALIZATION --- */
+        #radar-container {
+            position: absolute;
+            bottom: 30px; left: 30px;
+            width: 180px; height: 180px;
+            border: 2px solid rgba(0, 243, 255, 0.3);
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(0,20,40,0.8) 0%, rgba(0,0,0,0.9) 100%);
+            box-shadow: 0 0 20px rgba(0, 243, 255, 0.1);
+            pointer-events: auto;
+            overflow: hidden;
+            display: flex; justify-content: center; align-items: center;
+        }
+        #radar-container::before {
+            content: ''; position: absolute;
+            width: 100%; height: 100%;
+            background-image: 
+                linear-gradient(rgba(0, 243, 255, 0.2) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 243, 255, 0.2) 1px, transparent 1px);
+            background-size: 20px 20px;
+            border-radius: 50%;
+            opacity: 0.3;
+        }
+        .radar-sweep {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: conic-gradient(from 0deg, transparent 0deg, rgba(0, 243, 255, 0.1) 60deg, rgba(0, 243, 255, 0.8) 90deg, transparent 91deg);
+            border-radius: 50%;
+            animation: radar-spin 4s linear infinite;
+        }
+        .radar-center {
+            width: 6px; height: 6px; background: var(--neon-blue); border-radius: 50%;
+            box-shadow: 0 0 10px var(--neon-blue); z-index: 2;
+        }
+        .radar-blip {
+            position: absolute; width: 4px; height: 4px; background: var(--neon-pink); border-radius: 50%;
+            animation: blip-pulse 2s infinite; opacity: 0;
+        }
+
+        @keyframes radar-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @keyframes blip-pulse { 0% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(2); } }
+
+        /* Loader */
+        #loader {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000; z-index: 100;
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            transition: opacity 1s;
+        }
+        .loader-ring {
+            width: 80px; height: 80px; border: 4px solid #333;
+            border-top: 4px solid var(--neon-blue); border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        @media (max-width: 768px) {
+            .content-panel { width: 90%; right: 5%; bottom: 5%; top: auto; transform: translateY(50px); }
+            .content-panel.active { transform: translateY(0); }
+            header { flex-direction: column; align-items: flex-start; gap: 1rem; }
+            .nav-container { flex-wrap: wrap; }
+            #radar-container { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="loader">
+        <div class="loader-ring"></div>
+        <p style="margin-top: 20px; font-family: 'Share Tech Mono'; color: var(--neon-blue);">INITIALIZING SYSTEMS...</p>
+    </div>
+
+    <!-- 3D Canvas -->
+    <div id="canvas-container"></div>
+
+    <!-- UI Overlay -->
+    <div id="ui-layer">
+        <header>
+            <div class="brand">
+                <h1>Bhupathi Raja<span style="color:var(--neon-blue)">M</span></h1>
+                <span>Hardware Engineer</span>
+            </div>
+            <div style="display:flex; align-items:center;">
+                <button id="sound-toggle" onclick="toggleAudio()"><i class="fas fa-volume-mute"></i></button>
+                <nav class="nav-container">
+                    <button class="nav-btn" data-target="about" onmouseenter="playSound('hover')" onclick="navigateTo('about'); playSound('click')">PROFILE</button>
+                    <button class="nav-btn" data-target="projects" onmouseenter="playSound('hover')" onclick="navigateTo('projects'); playSound('click')">PROJECTS</button>
+                    <button class="nav-btn" data-target="experience" onmouseenter="playSound('hover')" onclick="navigateTo('experience'); playSound('click')">EXPERIENCE</button>
+                    <button class="nav-btn" data-target="toolkit" onmouseenter="playSound('hover')" onclick="navigateTo('toolkit'); playSound('click')">TOOLKIT</button>
+                    <button class="nav-btn" data-target="contact" onmouseenter="playSound('hover')" onclick="navigateTo('contact'); playSound('click')">CONTACT</button>
+                </nav>
+            </div>
+        </header>
+
+        <!-- Radar System -->
+        <div id="radar-container">
+            <div class="radar-sweep"></div>
+            <div class="radar-center"></div>
+            <div class="radar-blip" style="top: 40px; right: 50px; animation-delay: 0.5s;"></div>
+            <div class="radar-blip" style="bottom: 50px; left: 40px; animation-delay: 1.2s; background: var(--neon-amber);"></div>
+            <div class="radar-blip" style="top: 80px; left: 20px; animation-delay: 2.5s; background: var(--neon-green);"></div>
+        </div>
+
+        <!-- Content Panels -->
+        
+        <!-- 1. ABOUT ME -->
+        <div id="panel-about" class="content-panel">
+            <button class="close-btn" onclick="closePanel(); playSound('close')"><i class="fas fa-times"></i></button>
+            <div class="panel-header">
+                <h2>About Me</h2>
+                <span class="subtitle">EEE GRADUATE // POWER ELECTRONICS & AEROSPACE</span>
+            </div>
+
+            <div class="holo-profile-container">
+                <div class="holo-frame">
+                    <img src="https://media.licdn.com/dms/image/v2/D5603AQGo1PDQJGM0Pw/profile-displayphoto-crop_800_800/B56Zgi6WRmHkAI-/0/1752932380792?e=1766620800&v=beta&t=eKaRu9dXPCiFVrgrNKu3s3AhejGxrXkYcywvUIj9umE" class="holo-img" alt="Engineer Profile">
+                </div>
+            </div>
+
+            <p style="margin-bottom:15px; color:#ddd; line-height:1.6; text-align: justify;">
+                I am an <strong style="color:var(--neon-blue)">EEE graduate</strong> with strong interests in power electronics, battery systems, and advanced energy conversion for <strong style="color:var(--neon-amber)">EV and aerospace applications</strong>.
+            </p>
+            <p style="margin-bottom:15px; color:#ddd; line-height:1.6; text-align: justify;">
+                My work focuses on the simulation and control of complex systems like DC fast chargers, multilevel inverters, and Solid-State Transformers (SSTs) using industry-standard tools like <span style="color:var(--neon-green)">MATLAB/Simulink</span> and <span style="color:var(--neon-green)">LTspice</span>.
+            </p>
+        </div>
+
+        <!-- 2. PROJECTS -->
+        <div id="panel-projects" class="content-panel">
+            <button class="close-btn" onclick="closePanel(); playSound('close')"><i class="fas fa-times"></i></button>
+            <div class="panel-header">
+                <h2>Projects</h2>
+                <span class="subtitle">CLICK TO EXPAND DETAILS</span>
+            </div>
+            
+            <div class="project-card" onclick="toggleProject(this)">
+                <div class="project-header">
+                    <h3>1. Design of DC-DC Converter/Regulator</h3>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="project-details">
+                    <p>Designed a high-efficiency buck-boost converter for regulated power delivery. Analyzed switching losses and implemented feedback control loops to maintain stability under varying load conditions.</p>
+                </div>
+            </div>
+
+            <div class="project-card" style="border-left-color: var(--neon-amber);" onclick="toggleProject(this)">
+                <div class="project-header">
+                    <h3>2. Power & Energy Budget Analysis</h3>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="project-details">
+                    <p>Conducted comprehensive energy audits for satellite subsystems. Calculated peak vs. average power consumption to dimension solar arrays and battery banks for specific orbital periods.</p>
+                </div>
+            </div>
+
+            <div class="project-card" style="border-left-color: var(--neon-pink);" onclick="toggleProject(this)">
+                <div class="project-header">
+                    <h3>3. Radiation Effects & Solar-Cell Performance</h3>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="project-details">
+                    <p>Simulated degradation of PV cells under proton and electron flux typical of LEO environments. Made a detailed report of POWER calculations with and without cover-glass shielding thickness. Documented comprehensive BOL/EOL values at different temperatures.</p>
+                </div>
+            </div>
+
+            <div class="project-card" style="border-left-color: var(--neon-blue);" onclick="toggleProject(this)">
+                <div class="project-header">
+                    <h3>4. SST Based DC Fast Charger</h3>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="project-details">
+                    <p>Modeled a Solid-State Transformer architecture for EV charging stations. Replaced bulky line-frequency transformers with high-frequency isolated converters to improve power density.</p>
+                </div>
+            </div>
+
+            <div class="project-card" style="border-left-color: var(--neon-green);" onclick="toggleProject(this)">
+                <div class="project-header">
+                    <h3>5. Designed EMI Filter</h3>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="project-details">
+                    <p>Designed input/output EMI filters to suppress conducted interference in switching power supplies, ensuring compliance with EMC standards (MIL-STD-461G).</p>
+                </div>
+            </div>
+
+            <div class="project-card" style="border-left-color: #fff;" onclick="toggleProject(this)">
+                <div class="project-header">
+                    <h3>6. FMEA, Reliability & Derating Analysis</h3>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="project-details">
+                    <p>Performed Failure Mode and Effects Analysis (FMEA) on power distribution units. Applied component derating factors to enhance system longevity and reliability in harsh environments.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. EXPERIENCE -->
+        <div id="panel-experience" class="content-panel">
+            <button class="close-btn" onclick="closePanel(); playSound('close')"><i class="fas fa-times"></i></button>
+            <div class="panel-header">
+                <h2>Experience</h2>
+                <span class="subtitle">PROFESSIONAL HISTORY</span>
+            </div>
+
+            <div class="exp-item">
+                <div class="exp-role">Hardware Engineer</div>
+                <div class="exp-company">XDlinx Space Labs // JUL 2025 - Present</div>
+                <div class="exp-desc">
+                    Designed EMI filters for EMC compliance and analyzed radiation-driven solar panel degradation, performing BOL–EOL power assessments to support accurate satellite power budgeting.
+                </div>
+            </div>
+
+            <div class="exp-item">
+                <div class="exp-role">Power Electronics Trainee</div>
+                <div class="exp-company">XDlinx Space Labs // Jan 2025 - Jun 2025</div>
+                <div class="exp-desc">
+                    Assisted in the PCB layout of a CubeSat power distribution unit. Validated component selection against radiation hardness databases and performed thermal stress testing.
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. TOOLKIT -->
+        <div id="panel-toolkit" class="content-panel">
+            <button class="close-btn" onclick="closePanel(); playSound('close')"><i class="fas fa-times"></i></button>
+            <div class="panel-header">
+                <h2>Technical Arsenal</h2>
+                <span class="subtitle">TOOLS & COMPETENCIES</span>
+            </div>
+            
+            <h4 style="color:white; margin-bottom:10px;">Simulation & Design</h4>
+            <div class="tech-grid">
+                <div class="tech-item">MATLAB</div>
+                <div class="tech-item">Simulink</div>
+                <div class="tech-item">LTspice</div>
+            </div>
+
+            <h4 style="color:white; margin:15px 0 10px;">Power Systems</h4>
+            <div class="tech-grid">
+                <div class="tech-item">DC-DC Converters</div>
+                <div class="tech-item">Multilevel Inverters</div>
+                <div class="tech-item">SSTs</div>
+                <div class="tech-item">Li-ion Batteries</div>
+            </div>
+        </div>
+
+        <!-- 5. CONTACT -->
+        <div id="panel-contact" class="content-panel">
+            <button class="close-btn" onclick="closePanel(); playSound('close')"><i class="fas fa-times"></i></button>
+            <div class="panel-header">
+                <h2>LINK🔗</h2>
+                <span class="subtitle">ESTABLISH CONNECTION</span>
+            </div>
+            
+            <div class="contact-card">
+                <p style="color:#aaa; margin-bottom: 20px;">Ready to collaborate on the next generation of power systems?</p>
+                <a href="mailto:m.bhupathiraja@gmail.com" class="contact-btn"><i class="fas fa-envelope"></i> Send Email</a>
+                <a href="https://www.linkedin.com/in/bhupathiraja-morigadi/" target="_blank" class="contact-btn" style="border-color: var(--neon-blue);"><i class="fab fa-linkedin"></i> LinkedIn</a>
+                <div style="margin-top: 20px; font-size: 0.8rem; color: #666; font-family: 'Share Tech Mono';">FREQUENCY: 2.4 GHz // ENCRYPTED</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
+    <script>
+        // --- AUDIO ENGINE ---
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        let isMuted = true;
+
+        function toggleAudio() {
+            isMuted = !isMuted;
+            const icon = document.querySelector('#sound-toggle i');
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            if(!isMuted) {
+                icon.className = 'fas fa-volume-up';
+                playSound('startup');
+            } else {
+                icon.className = 'fas fa-volume-mute';
+            }
+        }
+
+        function playSound(type) {
+            if (isMuted) return;
+            const osc = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            osc.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            const now = audioCtx.currentTime;
+
+            if (type === 'hover') {
+                osc.type = 'sine'; osc.frequency.setValueAtTime(400, now); osc.frequency.exponentialRampToValueAtTime(800, now + 0.1);
+                gainNode.gain.setValueAtTime(0.05, now); gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+                osc.start(now); osc.stop(now + 0.1);
+            } else if (type === 'click') {
+                osc.type = 'square'; osc.frequency.setValueAtTime(200, now); osc.frequency.exponentialRampToValueAtTime(50, now + 0.15);
+                gainNode.gain.setValueAtTime(0.1, now); gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+                osc.start(now); osc.stop(now + 0.15);
+            } else if (type === 'close') {
+                osc.type = 'triangle'; osc.frequency.setValueAtTime(600, now); osc.frequency.exponentialRampToValueAtTime(200, now + 0.2);
+                gainNode.gain.setValueAtTime(0.1, now); gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+                osc.start(now); osc.stop(now + 0.2);
+            }
+        }
+
+        // --- TOGGLE PROJECT DETAILS ---
+        window.toggleProject = function(card) {
+            card.classList.toggle('active');
+            playSound('click');
+        }
+
+        // --- THREE.JS SETUP ---
+        const container = document.getElementById('canvas-container');
+        const scene = new THREE.Scene();
+        scene.fog = new THREE.FogExp2(0x020408, 0.002);
+
+        const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(0, 5, 25);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.toneMapping = THREE.ReinhardToneMapping;
+        container.appendChild(renderer.domElement);
+
+        // --- POST PROCESSING ---
+        const renderScene = new THREE.RenderPass(scene, camera);
+        const bloomPass = new THREE.UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
+        bloomPass.threshold = 0.2; bloomPass.strength = 1.2; bloomPass.radius = 0.5;
+
+        const composer = new THREE.EffectComposer(renderer);
+        composer.addPass(renderScene);
+        composer.addPass(bloomPass);
+
+        // --- OBJECTS ---
+        const starGeo = new THREE.BufferGeometry();
+        const starCount = 6000;
+        const starPos = new Float32Array(starCount * 3);
+        const starColors = new Float32Array(starCount * 3);
+        for(let i=0; i<starCount; i++) {
+            const x = (Math.random() - 0.5) * 400; const y = (Math.random() - 0.5) * 400; const z = (Math.random() - 0.5) * 400;
+            starPos[i*3] = x; starPos[i*3+1] = y; starPos[i*3+2] = z;
+            starColors[i*3] = 0.8; starColors[i*3+1] = 0.9; starColors[i*3+2] = 1.0;
+        }
+        starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
+        starGeo.setAttribute('color', new THREE.BufferAttribute(starColors, 3));
+        const starMat = new THREE.PointsMaterial({ size: 0.3, vertexColors: true, transparent: true, opacity: 0.8 });
+        const stars = new THREE.Points(starGeo, starMat);
+        scene.add(stars);
+
+        const coreGroup = new THREE.Group();
+        scene.add(coreGroup);
+        const coreGeo = new THREE.IcosahedronGeometry(4, 2);
+        const coreMat = new THREE.MeshBasicMaterial({ color: 0x2244ff, wireframe: true, transparent: true, opacity: 0.7 });
+        const coreMesh = new THREE.Mesh(coreGeo, coreMat);
+        coreGroup.add(coreMesh);
+        coreGroup.add(new THREE.PointLight(0x00f3ff, 5, 25));
+
+        const shellGeo = new THREE.IcosahedronGeometry(5, 1);
+        const shellMat = new THREE.MeshBasicMaterial({ color: 0x00f3ff, wireframe: true, transparent: true, opacity: 0.15 });
+        const shellMesh = new THREE.Mesh(shellGeo, shellMat);
+        coreGroup.add(shellMesh);
+
+        // Satellites
+        const satellites = [];
+        function createDetailedSatellite(type, color) {
+            const group = new THREE.Group();
+            const mat = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.4, metalness: 0.8, emissive: color, emissiveIntensity: 0.2 });
+            const body = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), mat); group.add(body);
+            const panelGeo = new THREE.BoxGeometry(3, 0.1, 0.8); const panel = new THREE.Mesh(panelGeo, mat); group.add(panel);
+            const dishGeo = new THREE.ConeGeometry(0.4, 0.5, 16, 1, true); const dish = new THREE.Mesh(dishGeo, mat);
+            dish.position.y = 0.6; dish.rotation.x = Math.PI; group.add(dish);
+            const spriteMat = new THREE.SpriteMaterial({ map: new THREE.TextureLoader().load('https://threejs.org/examples/textures/sprites/glow.png'), color: color, transparent: true, blending: THREE.AdditiveBlending });
+            const sprite = new THREE.Sprite(spriteMat); sprite.scale.set(4, 4, 1); group.add(sprite);
+            return group;
+        }
+
+        function addOrbitObject(id, color, distance, speed, yOffset) {
+            const pivot = new THREE.Object3D();
+            pivot.rotation.z = Math.random() * 0.5;
+            scene.add(pivot);
+            const mesh = createDetailedSatellite('probe', color);
+            mesh.position.set(distance, yOffset, 0);
+            mesh.userData = { id: id, isInteractive: true };
+            pivot.add(mesh);
+            const trailGeo = new THREE.RingGeometry(distance-0.05, distance+0.05, 64);
+            const trailMat = new THREE.MeshBasicMaterial({ color: color, opacity: 0.1, transparent: true, side: THREE.DoubleSide });
+            const trail = new THREE.Mesh(trailGeo, trailMat);
+            trail.rotation.x = Math.PI/2;
+            pivot.add(trail);
+            satellites.push({ pivot, mesh, speed });
+        }
+
+        // Satellite Configs
+        addOrbitObject('about', 0x00f3ff, 10, 0.002, 0);       // Blue
+        addOrbitObject('projects', 0xff9e00, 14, -0.0015, 2);  // Amber
+        addOrbitObject('experience', 0xbc13fe, 18, 0.0012, -1); // Purple
+        addOrbitObject('toolkit', 0x00ff9d, 22, -0.001, -2);    // Green
+        addOrbitObject('contact', 0xff0055, 26, 0.0008, 1);    // Pink
+
+        const sunLight = new THREE.DirectionalLight(0xffffff, 1);
+        sunLight.position.set(20, 10, 20);
+        scene.add(sunLight);
+        scene.add(new THREE.AmbientLight(0x404040));
+
+        // Animation
+        let mouseX = 0, mouseY = 0;
+        let targetRotationX = 0, targetRotationY = 0;
+        function animate() {
+            requestAnimationFrame(animate);
+            coreGroup.rotation.y += 0.002;
+            shellMesh.rotation.y -= 0.001;
+            coreGroup.rotation.y += (targetRotationX - coreGroup.rotation.y) * 0.05;
+            coreGroup.rotation.x += (targetRotationY - coreGroup.rotation.x) * 0.05;
+            stars.rotation.y -= 0.0002;
+            satellites.forEach(sat => {
+                sat.pivot.rotation.y += sat.speed;
+                sat.mesh.rotation.y += 0.01;
+                sat.mesh.rotation.z += 0.005;
+            });
+            camera.position.x += (mouseX * 2 - camera.position.x) * 0.02;
+            camera.position.y += (mouseY * 2 + 5 - camera.position.y) * 0.02;
+            camera.lookAt(0, 0, 0);
+            composer.render();
+        }
+        animate();
+
+        // Inputs
+        document.addEventListener('mousemove', (e) => {
+            mouseX = (e.clientX - window.innerWidth / 2) * 0.01;
+            mouseY = (e.clientY - window.innerHeight / 2) * 0.01;
+        });
+        let isDragging = false;
+        let previousMousePosition = { x: 0, y: 0 };
+        document.addEventListener('mousedown', () => isDragging = true);
+        document.addEventListener('mouseup', () => isDragging = false);
+        document.addEventListener('mousemove', (e) => {
+            if(isDragging) {
+                targetRotationX += (e.offsetX - previousMousePosition.x) * 0.005;
+                targetRotationY += (e.offsetY - previousMousePosition.y) * 0.005;
+            }
+            previousMousePosition = { x: e.offsetX, y: e.offsetY };
+        });
+
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+        window.addEventListener('click', (event) => {
+            if(document.querySelector('.content-panel.active')) return;
+            if(event.target.closest('button') || event.target.closest('a')) return;
+
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObjects(scene.children, true);
+            for(let i=0; i<intersects.length; i++) {
+                let obj = intersects[i].object;
+                while(obj.parent && !obj.userData.id) obj = obj.parent;
+                if(obj.userData.id) {
+                    navigateTo(obj.userData.id);
+                    playSound('click');
+                    break;
+                }
+            }
+        });
+
+        // Navigation
+        window.navigateTo = function(id) {
+            closePanel();
+            const panel = document.getElementById('panel-' + id);
+            const btn = document.querySelector(`.nav-btn[data-target="${id}"]`);
+            if(panel) setTimeout(() => panel.classList.add('active'), 100);
+            if(btn) btn.classList.add('active');
+
+            let targetPos = new THREE.Vector3();
+            if(id === 'about') targetPos.set(10, 5, 10);
+            if(id === 'projects') targetPos.set(-10, 8, 12);
+            if(id === 'experience') targetPos.set(5, 5, 16);
+            if(id === 'toolkit') targetPos.set(0, -8, 15);
+            if(id === 'contact') targetPos.set(8, -2, 18);
+
+            gsap.to(camera.position, {
+                x: targetPos.x, y: targetPos.y, z: targetPos.z,
+                duration: 1.5, ease: "power2.inOut"
+            });
+        };
+
+        window.closePanel = function() {
+            document.querySelectorAll('.content-panel').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            gsap.to(camera.position, { x: 0, y: 5, z: 25, duration: 1.5, ease: "power2.inOut" });
+        };
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            composer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        window.onload = () => {
+            setTimeout(() => {
+                document.getElementById('loader').style.opacity = 0;
+                setTimeout(() => document.getElementById('loader').style.display = 'none', 1000);
+            }, 1500);
+        };
+    </script>
+</body>
+</html>
